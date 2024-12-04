@@ -14,6 +14,6 @@ CAR_COLOR = (255, 0, 0)
 TRACK_IMAGE_PATH = "assets/track.png"
 
 # RL settings
-RAY_COUNT = 5
 RAY_LENGTH = 200
-RAY_ANGLES = [-45, 0, 45, 90, -90]
+RAY_ANGLES = [-30, 0, 30, 90, -90]
+

@@ -4,7 +4,7 @@ from cgitb import small
 import pygame
 import math
 
-from settings import CAR_WIDTH, CAR_HEIGHT, CAR_COLOR
+from settings import CAR_WIDTH, CAR_HEIGHT, CAR_COLOR, RAY_LENGTH, RAY_ANGLES
 
 MAX_SPEED = 2
 ACCELERATION = 0.2
@@ -14,18 +14,17 @@ TURN_SPEED = 3
 
 
 class Car:
+    width = CAR_WIDTH
+    height = CAR_HEIGHT
+    color = CAR_COLOR
+
+    angle = 0
+    speed = 0
+
+    dead = False
+
     def __init__(self, x, y):
         self.position = pygame.math.Vector2(x, y)
-        self.angle = 0  # En degrés
-        self.speed = 0
-
-        self.width = CAR_WIDTH
-        self.height = CAR_HEIGHT
-        self.color = CAR_COLOR
-
-        # Raycasting
-        self.ray_length = 200  # Max distance a ray can detect
-        self.ray_angles = [-30, 0, 30, 90, -90]
 
         # Créer l'image et le masque de la voiture
         self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -67,8 +66,8 @@ class Car:
         distances = self.cast_rays(track)  # Get the distances for visualization
         for (start, end), distance in zip(self.get_rays(), distances):
             # Calculate the endpoint of the ray
-            endpoint_x = start[0] + (end[0] - start[0]) * distance / self.ray_length
-            endpoint_y = start[1] + (end[1] - start[1]) * distance / self.ray_length
+            endpoint_x = start[0] + (end[0] - start[0]) * distance / RAY_LENGTH
+            endpoint_y = start[1] + (end[1] - start[1]) * distance / RAY_LENGTH
             endpoint = (endpoint_x, endpoint_y)
 
             # Draw the ray
@@ -102,11 +101,11 @@ class Car:
     def get_rays(self):
         """Calculate the end points of all rays relative to the car."""
         rays = []
-        for ray_angle in self.ray_angles:
+        for ray_angle in RAY_ANGLES:
             total_angle = self.angle + ray_angle
             rad = math.radians(total_angle)
-            end_x = self.position.x + math.cos(rad) * self.ray_length
-            end_y = self.position.y + math.sin(rad) * self.ray_length
+            end_x = self.position.x + math.cos(rad) * RAY_LENGTH
+            end_y = self.position.y + math.sin(rad) * RAY_LENGTH
             rays.append(((self.position.x, self.position.y), (end_x, end_y)))
         return rays
 
@@ -114,7 +113,7 @@ class Car:
         """Cast rays and detect distances to track boundaries or when they leave the track."""
         distances = []
         for start, end in self.get_rays():
-            ray_length = self.ray_length
+            ray_length = RAY_LENGTH
             step = 1  # Ray increment in pixels
             for i in range(0, ray_length, step):
                 x = int(start[0] + (end[0] - start[0]) * i / ray_length)
@@ -166,11 +165,13 @@ class Car:
             if 0 <= x < track.rect.width and 0 <= y < track.rect.height:
                 color = track.image.get_at((x, y))
                 if color == (255, 255, 255):
-                    print("Collision detected at corner:", corner)
+                    # print("Collision detected at corner:", corner)
                     self.speed = 0
+                    self.dead = True
                     return True
             else:
                 print("Corner out of bounds:", corner)
                 self.speed = 0
+                self.dead = True
                 return True
         return False
