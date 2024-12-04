@@ -4,19 +4,24 @@ from cgitb import small
 import pygame
 import math
 
+MAX_SPEED = 2
+ACCELERATION = 0.2
+BRAKE_DECELERATION = 0.3
+FREE_DECELERATION = 0.1
+TURN_SPEED = 3
+CAR_WIDTH = 25
+CAR_HEIGHT = 15
+
 class Car:
-    def __init__(self, x, y, width=40, height=20):
+    def __init__(self, x, y):
         self.position = pygame.math.Vector2(x, y)
         self.angle = 0  # En degrés
         self.speed = 0
-        self.max_speed = 3
-        self.acceleration = 0.2
-        self.brake_deceleration = 0.5
-        self.free_deceleration = 0.1
-        self.turn_speed = 5  # Degrés par frame
-        self.width = width
-        self.height = height
+
+        self.width = CAR_WIDTH
+        self.height = CAR_HEIGHT
         self.color = (255, 0, 0)
+
 
         # Créer l'image et le masque de la voiture
         self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -33,51 +38,80 @@ class Car:
 
         # Appliquer la décélération libre
         if self.speed > 0:
-            self.speed -= self.free_deceleration
+            self.speed -= FREE_DECELERATION
         elif self.speed < 0:
-            self.speed += self.free_deceleration
+            self.speed += FREE_DECELERATION
 
         # Éviter les petites valeurs flottantes
-        if abs(self.speed) < self.free_deceleration:
+        if abs(self.speed) < FREE_DECELERATION:
             self.speed = 0
 
         # Mettre à jour le rectangle et le masque
         self.rect = self.image.get_rect(center=self.position)
         self.mask = pygame.mask.from_surface(self.image)
 
-    def accelerate(self):
-        if self.speed < self.max_speed:
-            self.speed += self.acceleration
-
-    def brake(self):
-        if self.speed > -self.max_speed / 2:
-            self.speed -= self.brake_deceleration
-
-    def turn_left(self):
-        if self.speed != 0:
-            self.angle -= self.turn_speed * (self.speed / self.max_speed)
-
-    def turn_right(self):
-        if self.speed != 0:
-            self.angle += self.turn_speed * (self.speed / self.max_speed)
-
     def draw(self, surface):
-        # Dessiner la voiture comme un rectangle
+        # Draw the car as a rotated rectangle
         car_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         pygame.draw.rect(car_surface, self.color, (0, 0, self.width, self.height))
         rotated_image = pygame.transform.rotate(car_surface, -self.angle)
-        rotated_rect = rotated_image.get_rect(center=self.position)
+        rect = rotated_image.get_rect(center=self.position)
+        surface.blit(rotated_image, rect.topleft)
+    ######################
+    # Car Movement Logic #
+    ######################
+    def accelerate(self):
+        if self.speed < MAX_SPEED:
+            self.speed += ACCELERATION
 
-        # Mettre à jour le masque pour la détection des collisions
-        self.mask = pygame.mask.from_surface(rotated_image)
+    def brake(self):
+        if self.speed > -MAX_SPEED / 2:
+            self.speed -= BRAKE_DECELERATION
 
-        surface.blit(rotated_image, rotated_rect.topleft)
+    def turn_left(self):
+        if self.speed != 0:
+            self.angle -= TURN_SPEED * (self.speed / MAX_SPEED)
+
+    def turn_right(self):
+        if self.speed != 0:
+            self.angle += TURN_SPEED * (self.speed / MAX_SPEED)
+
+    #############################
+    # Collision Detection Logic #
+    #############################
+    def get_corners(self):
+        """Calculate the four corners of the car after rotation."""
+        half_width = self.width / 2
+        half_height = self.height / 2
+
+        # Calculate the offsets for each corner
+        corners = [
+            pygame.math.Vector2(-half_width, -half_height),  # Top-left
+            pygame.math.Vector2(half_width, -half_height),   # Top-right
+            pygame.math.Vector2(half_width, half_height),    # Bottom-right
+            pygame.math.Vector2(-half_width, half_height),   # Bottom-left
+        ]
+
+        # Rotate corners and adjust to the car's position
+        rotated_corners = [
+            self.position + corner.rotate(self.angle) for corner in corners
+        ]
+        return rotated_corners
 
     def check_collision(self, track):
-        # Calculer le décalage entre la voiture et le circuit
-        offset = (int(self.rect.left - track.rect.left), int(self.rect.top - track.rect.top))
-        # Vérifier la collision entre les masques
-        collision_point = track.mask.overlap(self.mask, offset)
-        if collision_point:
-            print("Collision détectée avec la bordure !")
-            self.speed = 0
+        """Check if any corner of the car is off the track."""
+        corners = self.get_corners()
+        for corner in corners:
+            x, y = int(corner.x), int(corner.y)
+            # Check if the corner is outside the track boundaries
+            if 0 <= x < track.rect.width and 0 <= y < track.rect.height:
+                color = track.image.get_at((x, y))
+                if color == (255, 255, 255):
+                    print("Collision detected at corner:", corner)
+                    self.speed = 0
+                    return True
+            else:
+                print("Corner out of bounds:", corner)
+                self.speed = 0
+                return True
+        return False
