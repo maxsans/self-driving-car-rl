@@ -12,7 +12,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Initialiser la voiture et le circuit
-    track = Track('assets/track.png')
+    track = Track()
     car = Car(*track.start_point)
 
     running = True

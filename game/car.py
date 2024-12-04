@@ -4,13 +4,14 @@ from cgitb import small
 import pygame
 import math
 
+from settings import CAR_WIDTH, CAR_HEIGHT, CAR_COLOR
+
 MAX_SPEED = 2
 ACCELERATION = 0.2
 BRAKE_DECELERATION = 0.3
 FREE_DECELERATION = 0.1
 TURN_SPEED = 3
-CAR_WIDTH = 25
-CAR_HEIGHT = 15
+
 
 class Car:
     def __init__(self, x, y):
@@ -20,7 +21,7 @@ class Car:
 
         self.width = CAR_WIDTH
         self.height = CAR_HEIGHT
-        self.color = (255, 0, 0)
+        self.color = CAR_COLOR
 
         # Raycasting
         self.ray_length = 200  # Max distance a ray can detect
