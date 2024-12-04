@@ -38,10 +38,14 @@ def main():
         car.update()
         car.check_collision(track)
 
+        # distances = car.cast_rays(track)
+        # print("Ray distances:", distances)
+
         # Rendu
         screen.fill((0, 0, 0))  # Fond noir
         track.draw(screen)
         car.draw(screen)
+        car.draw_rays(screen, track)
         pygame.display.flip()
 
     pygame.quit()
