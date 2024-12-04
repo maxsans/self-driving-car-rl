@@ -5,16 +5,23 @@ from game.car import Car
 from game.track import Track
 from settings import *
 
-class Engine:
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("Autonomous Driving Simulation")
+class GameEngine:
+    def __init__(self, screen):
+        self.screen = screen
+        # Initialize track and car
+        self.track = Track()
+        self.car = Car(*self.track.start_point)
+        pygame.display.set_caption("Simulation de Conduite Autonome 2D")
         self.clock = pygame.time.Clock()
 
-        # Initialize simulation components
-        self.track = Track()
-        self.car = Car(150, 150)
+        self.running = True
+        self.show_rays = True
+
+
+    def reset(self):
+        """Reset the game to its initial state."""
+        self.car = Car(*self.track.start_point)
+        self.running = True
 
     def run(self):
         running = True
@@ -24,6 +31,9 @@ class Engine:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_t:
+                        self.show_rays = not self.show_rays
 
             # Input handling
             keys = pygame.key.get_pressed()
@@ -38,13 +48,19 @@ class Engine:
 
             # Update simulation
             self.car.update()
+            self.car.check_collision(self.track)
+
+
+            if self.car.dead:
+                print("Car crashed!")
+                self.reset()
             # distances = self.car.cast_rays(self.track)
 
             # Render simulation
             self.screen.fill((0, 0, 0))
             self.track.draw(self.screen)
             self.car.draw(self.screen)
-            self.car.draw_rays(self.screen, self.track)
+            if self.show_rays:
+                self.car.draw_rays(self.screen, self.track)
             pygame.display.flip()
 
-        pygame.quit()
