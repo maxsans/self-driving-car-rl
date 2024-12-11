@@ -52,6 +52,7 @@ class GameEngine:
         self.lap_count = 0
         self.lap_start_time = pygame.time.get_ticks()
         self.last_lap_time = 0
+        self.elapsed_time = 0
         self.remaining_checkpoints = self.track.checkpoints.copy()
         self.current_checkpoint_index = 0
         self.show_checkpoints = True  # State for displaying checkpoints
@@ -70,6 +71,8 @@ class GameEngine:
         self.current_checkpoint_index = 0
         self.lap_start_time = pygame.time.get_ticks()
         self.total_pause_time = 0
+        self.start_time = pygame.time.get_ticks()
+        self.elapsed_time = 0
 
     def run(self):
         running = True
@@ -141,11 +144,11 @@ class GameEngine:
             self.car.draw_rays(self.screen, self.track)
 
         self.elapsed_time = (pygame.time.get_ticks() - self.start_time - self.total_pause_time) / 1000
-        self.timer_text = self.font.render(f"{self.elapsed_time:.2f}s", True, (0, 0, 0))
+        timer_text = self.font.render(f"{self.elapsed_time:.2f}s", True, (0, 0, 0))
         if self.show_checkpoints:
             self.track.draw_checkpoints(self.screen)
         self.checkbox.draw(self.screen)
-        self.screen.blit(self.timer_text, (WINDOW_WIDTH - self.timer_text.get_width() - 10, 10))
+        self.screen.blit(timer_text, (WINDOW_WIDTH - timer_text.get_width() - 10, 10))
 
         # Display lap information
         lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
@@ -172,7 +175,6 @@ class GameEngine:
         if self.current_checkpoint_index < len(self.track.checkpoints):
             checkpoint = self.track.checkpoints[self.current_checkpoint_index]
             if self.car.rect.colliderect(checkpoint):
-                print("Checkpoint passed!")
                 self.current_checkpoint_index += 1
 
     def draw_checkpoints(self, surface):
