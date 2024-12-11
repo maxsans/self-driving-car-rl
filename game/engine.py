@@ -41,6 +41,7 @@ class GameEngine:
 
         self.running = True
         self.show_rays = True
+
         self.font = pygame.font.Font(None, 36)
         self.start_time = pygame.time.get_ticks()
         self.pause_start_time = 0
@@ -64,6 +65,7 @@ class GameEngine:
         """Reset the game to its initial state."""
         self.car = Car(*self.track.start_point)
         self.running = True
+
         self.car_positions.append([])
         self.colors.append((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
         self.remaining_checkpoints = self.track.checkpoints.copy()
@@ -111,8 +113,7 @@ class GameEngine:
                 
                 self.car_positions[-1].append((self.car.position.x, self.car.position.y))
 
-                self.elapsed_time = (pygame.time.get_ticks() - self.start_time - self.total_pause_time) / 1000
-                self.timer_text = self.font.render(f"{self.elapsed_time:.2f}s", True, (0, 0, 0))
+
 
 
                 self.check_checkpoints()
@@ -129,25 +130,32 @@ class GameEngine:
                 self.total_pause_time = self.total_pause_time + (pygame.time.get_ticks() - self.start_time - self.total_pause_time)
                 self.reset()
 
-            # Render simulation
-            self.screen.fill((0, 0, 0))
-            self.track.draw(self.screen)
-            if self.show_checkpoints:
-                self.track.draw_checkpoints(self.screen)
-            self.car.draw(self.screen)
-            if self.show_rays:
-                self.car.draw_rays(self.screen, self.track)
-            self.checkbox.draw(self.screen)
-            self.screen.blit(self.timer_text, (WINDOW_WIDTH - self.timer_text.get_width() - 10, 10))
-            
-            # Display lap information
-            lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
-            self.screen.blit(lap_info, (10, 10))
-
-            pygame.display.flip()
+            self.draw()
         
         # Save car path
         self.save_car_path(self.track.image, self.car_positions, self.colors)
+
+    def draw(self):
+        # Render simulation
+        self.screen.fill((0, 0, 0))
+        self.track.draw(self.screen)
+        self.car.draw(self.screen)
+
+        if self.show_rays:
+            self.car.draw_rays(self.screen, self.track)
+
+        self.elapsed_time = (pygame.time.get_ticks() - self.start_time - self.total_pause_time) / 1000
+        self.timer_text = self.font.render(f"{self.elapsed_time:.2f}s", True, (0, 0, 0))
+        if self.show_checkpoints:
+            self.track.draw_checkpoints(self.screen)
+        self.checkbox.draw(self.screen)
+        self.screen.blit(self.timer_text, (WINDOW_WIDTH - self.timer_text.get_width() - 10, 10))
+
+        # Display lap information
+        lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
+        self.screen.blit(lap_info, (10, 10))
+
+        pygame.display.flip()
 
     def save_car_path(self, track_image, car_positions, colors):
         track_array = pygame.surfarray.array3d(track_image)

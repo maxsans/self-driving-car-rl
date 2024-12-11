@@ -34,6 +34,9 @@ class Car:
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
+        if self.dead:
+            return
+
         # Mise à jour de la position
         rad = math.radians(self.angle)
         self.position.x += math.cos(rad) * self.speed
