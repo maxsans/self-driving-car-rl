@@ -7,6 +7,29 @@ from settings import *
 import matplotlib.pyplot as plt
 import random
 
+class Checkbox:
+    def __init__(self, x, y, width, height, text, initial=False):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (0, 0, 0)  # Set color to black
+        self.checked = initial
+        self.text = text
+        self.font = pygame.font.Font(None, 24)
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect, 2)  # Draw box in black
+        if self.checked:
+            pygame.draw.line(surface, self.color, self.rect.topleft, self.rect.bottomright, 2)  # Draw cross in black
+            pygame.draw.line(surface, self.color, self.rect.topright, self.rect.bottomleft, 2)  # Draw cross in black
+        text_surf = self.font.render(self.text, True, self.color)  # Render text in black
+        surface.blit(text_surf, (self.rect.x + self.rect.width + 10, self.rect.y))
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.checked = not self.checked
+                return self.checked
+        return None
+
 class GameEngine:
     def __init__(self, screen):
         self.screen = screen
@@ -30,6 +53,10 @@ class GameEngine:
         self.last_lap_time = 0
         self.remaining_checkpoints = self.track.checkpoints.copy()
         self.current_checkpoint_index = 0
+        self.show_checkpoints = True  # State for displaying checkpoints
+
+        # Initialize checkbox
+        self.checkbox = Checkbox(10, WINDOW_HEIGHT - 30, 20, 20, "Afficher les checkpoints", initial=True)
 
         pygame.display.flip()
 
@@ -61,6 +88,10 @@ class GameEngine:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_t:
                         self.show_rays = not self.show_rays
+                # Handle checkbox events
+                new_state = self.checkbox.handle_event(event)
+                if new_state is not None:
+                    self.show_checkpoints = new_state
 
             if not self.paused:
                 # Input handling
@@ -101,9 +132,12 @@ class GameEngine:
             # Render simulation
             self.screen.fill((0, 0, 0))
             self.track.draw(self.screen)
+            if self.show_checkpoints:
+                self.track.draw_checkpoints(self.screen)
             self.car.draw(self.screen)
             if self.show_rays:
                 self.car.draw_rays(self.screen, self.track)
+            self.checkbox.draw(self.screen)
             self.screen.blit(self.timer_text, (WINDOW_WIDTH - self.timer_text.get_width() - 10, 10))
             
             # Display lap information
@@ -137,3 +171,8 @@ class GameEngine:
             if self.car.rect.colliderect(checkpoint):
                 print("Checkpoint passed!")
                 self.current_checkpoint_index += 1
+
+    def draw_checkpoints(self, surface):
+        """Draw checkpoints if enabled."""
+        for checkpoint in self.track.checkpoints:
+            pygame.draw.rect(surface, (0, 0, 128), checkpoint)
