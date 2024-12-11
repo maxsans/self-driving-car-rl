@@ -59,8 +59,6 @@ class GameEngine:
         # Initialize checkbox
         self.checkbox = Checkbox(10, WINDOW_HEIGHT - 30, 20, 20, "Afficher les checkpoints", initial=True)
 
-        pygame.display.flip()
-
     def reset(self):
         """Reset the game to its initial state."""
         self.car = Car(*self.track.start_point)
@@ -113,9 +111,6 @@ class GameEngine:
                 
                 self.car_positions[-1].append((self.car.position.x, self.car.position.y))
 
-
-
-
                 self.check_checkpoints()
 
                 if self.current_checkpoint_index >= len(self.track.checkpoints):
@@ -131,7 +126,8 @@ class GameEngine:
                 self.reset()
 
             self.draw()
-        
+            pygame.display.flip()
+
         # Save car path
         self.save_car_path(self.track.image, self.car_positions, self.colors)
 
@@ -155,7 +151,6 @@ class GameEngine:
         lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
         self.screen.blit(lap_info, (10, 10))
 
-        pygame.display.flip()
 
     def save_car_path(self, track_image, car_positions, colors):
         track_array = pygame.surfarray.array3d(track_image)

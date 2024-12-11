@@ -4,13 +4,12 @@ import numpy as np
 import pygame
 
 import gymnasium as gym
-from gymnasium import spaces, register
-from sympy.strategies.core import switch
+from gymnasium import spaces
+from torch.backends.quantized import engine
 
-from game.car import Car, MAX_SPEED
+from game.car import MAX_SPEED
 from game.engine import GameEngine
-from game.track import Track
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS, RAY_LENGTH
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH
 
 
 class Actions(Enum):
@@ -21,17 +20,28 @@ class Actions(Enum):
     TURN_RIGHT = 4
 
 class CarRacingEnv(gym.Env):
-    metadata = {'render.render_modes': ["human"]}#, "rgb_array"]}
+    metadata = {'render_modes': ["human", "rgb_array"], 'render_fps': 30}
 
     def __init__(self, render_mode=None):
         super(CarRacingEnv, self).__init__()
+
+        self.render_mode = render_mode
+
+        assert self.render_mode is None or self.render_mode in self.metadata["render_modes"]
+
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        if self.render_mode == "human":
+            pygame.display.init()
+            self.screen = pygame.display.set_mode(
+                (WINDOW_WIDTH, WINDOW_HEIGHT)
+            )
+        else:  # mode == "rgb_array"
+            self.screen = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+
         self.clock = pygame.time.Clock()
 
         self.engine = GameEngine(self.screen)
-        # self.track = Track()
-        # self.car = Car(*self.track.start_point)
 
         # Define action and observation space
         # Actions: [accelerate, brake, turn_left, turn_right]
@@ -41,15 +51,16 @@ class CarRacingEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=np.array([-MAX_SPEED, -np.inf, 0, 0, 0, 0, 0 ]),
             high=np.array([MAX_SPEED, np.inf, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH]),
-            dtype=np.float32
+            dtype=np.float64
         )
 
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
+        if self.render_mode == "human":
+            self.render()
 
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        print("RESET env")
 
         self.engine.reset()
         return self._get_obs(), {}
@@ -80,13 +91,35 @@ class CarRacingEnv(gym.Env):
         return np.array([self.engine.car.speed, self.engine.car.angle] + ray_distances, dtype=np.float32)
 
     def _get_reward(self):
-        # TODO: Implement a better reward function
+        reward = 0
+
+        # Reward for moving forward
+        if self.engine.car.speed > 0:
+            reward += 5
+        else:
+            reward -= 10
+
+        # Penalty for collisions
         if self.engine.car.dead:
-            return -100
-        return 1
+            reward -= 100
+
+        return reward
 
     def render(self, mode='human'):
         self.engine.draw()
+
+        if self.render_mode == "human":
+            pygame.event.pump()
+            self.clock.tick(self.metadata["render_fps"])
+            pygame.display.flip()
+
+        elif self.render_mode == "rgb_array":
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2)
+            )
+
+        if self.clock is None:
+            self.clock = pygame.time.Clock()
 
     def close(self):
         pygame.quit()

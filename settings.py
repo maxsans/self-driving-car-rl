@@ -1,4 +1,5 @@
 # settings.py
+import os
 
 # Window settings
 WINDOW_WIDTH = 800
@@ -11,7 +12,8 @@ CAR_HEIGHT = 15
 CAR_COLOR = (255, 0, 0)
 
 # Track settings
-TRACK_IMAGE_PATH = "assets/track.png"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TRACK_IMAGE_PATH = os.path.join(BASE_DIR, 'assets', 'track.png')
 
 # RL settings
 RAY_LENGTH = 200
