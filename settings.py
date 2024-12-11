@@ -17,5 +17,5 @@ TRACK_IMAGE_PATH = os.path.join(BASE_DIR, 'assets', 'track.png')
 
 # RL settings
 RAY_LENGTH = 200
-RAY_ANGLES = [-30, 0, 30, 90, -90]
+RAY_ANGLES = [-90, -30, 0, 30, 90]
 
