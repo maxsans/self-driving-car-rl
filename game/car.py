@@ -25,6 +25,9 @@ class Car:
 
     def __init__(self, x, y):
         self.position = pygame.math.Vector2(x, y)
+        self.last_position = self.position.copy()
+        self.distance_traveled = 0
+        self.rays_distances = [0] * len(RAY_ANGLES)
 
         # Créer l'image et le masque de la voiture
         self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -33,14 +36,22 @@ class Car:
         self.rect = self.image.get_rect(center=self.position)
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self):
+    def update(self, track):
         if self.dead:
             return
 
+        self.last_position = self.position.copy()
         # Mise à jour de la position
         rad = math.radians(self.angle)
         self.position.x += math.cos(rad) * self.speed
         self.position.y += math.sin(rad) * self.speed
+
+        # Calculate distance traveled in this step
+        distance = math.sqrt(
+            (self.position.x - self.last_position.x) ** 2 +
+            (self.position.y - self.last_position.y) ** 2
+        )
+        self.distance_traveled += distance
 
         # Appliquer la décélération libre
         if self.speed > 0:
@@ -56,6 +67,8 @@ class Car:
         self.rect = self.image.get_rect(center=self.position)
         self.mask = pygame.mask.from_surface(self.image)
 
+        self.rays_distances = self.cast_rays(track)
+
     def draw(self, surface):
         # Draw the car as a rotated rectangle
         car_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -64,9 +77,9 @@ class Car:
         rect = rotated_image.get_rect(center=self.position)
         surface.blit(rotated_image, rect.topleft)
 
-    def draw_rays(self, surface, track):
+    def draw_rays(self, surface):
         # Draw the rays
-        distances = self.cast_rays(track)  # Get the distances for visualization
+        distances = self.rays_distances
         for (start, end), distance in zip(self.get_rays(), distances):
             # Calculate the endpoint of the ray
             endpoint_x = start[0] + (end[0] - start[0]) * distance / RAY_LENGTH

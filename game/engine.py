@@ -109,7 +109,7 @@ class GameEngine:
                     self.car.turn_right()
 
                 # Update simulation
-                self.car.update()
+                self.car.update(self.track)
                 self.car.check_collision(self.track)
                 
                 self.car_positions[-1].append((self.car.position.x, self.car.position.y))
@@ -141,7 +141,7 @@ class GameEngine:
         self.car.draw(self.screen)
 
         if self.show_rays:
-            self.car.draw_rays(self.screen, self.track)
+            self.car.draw_rays(self.screen)
 
         self.elapsed_time = (pygame.time.get_ticks() - self.start_time - self.total_pause_time) / 1000
         timer_text = self.font.render(f"{self.elapsed_time:.2f}s", True, (0, 0, 0))
