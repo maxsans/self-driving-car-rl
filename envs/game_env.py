@@ -13,12 +13,22 @@ from game.engine import GameEngine
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH
 
 
-class Actions(Enum):
-    DO_NOTHING = 0
+# class Actions(Enum):
+#     DO_NOTHING = 0
+#     ACCELERATE = 1
+#     BRAKE = 2
+#     TURN_LEFT = 3
+#     TURN_RIGHT = 4
+
+class Throttle(Enum):
+    NO_ACTION = 0
     ACCELERATE = 1
     BRAKE = 2
-    TURN_LEFT = 3
-    TURN_RIGHT = 4
+
+class Steering(Enum):
+    NO_ACTION = 0
+    TURN_LEFT = 1
+    TURN_RIGHT = 2
 
 class CarRacingEnv(gym.Env):
     metadata = {'render_modes': ["human", "rgb_array"], 'render_fps': 30}
@@ -44,8 +54,12 @@ class CarRacingEnv(gym.Env):
         self.engine = GameEngine(self.screen)
 
         # Define action and observation space
-        # Actions: [do nothing, accelerate, brake, turn_left, turn_right]
-        self.action_space = spaces.Discrete(5)
+        # # Actions: [do nothing, accelerate, brake, turn_left, turn_right]
+        # self.action_space = spaces.Discrete(5)
+        # Actions: [throttle, steering]
+        # Throttle: 0 = no action, 1 = accelerate, 2 = brake
+        # Steering: 0 = no action, 1 = turn left, 2 = turn right
+        self.action_space = spaces.MultiDiscrete([3, 3])
 
         # Observations: [x, y, speed, angle, ray_1 distance, ray_2, ray_3, ray_4, ray_5]
         self.observation_space = spaces.Box(
@@ -70,13 +84,23 @@ class CarRacingEnv(gym.Env):
         return self._get_obs(), {}
 
     def step(self, action):
-        if action == Actions.ACCELERATE.value:
+        # if action == Actions.ACCELERATE.value:
+        #     self.engine.car.accelerate()
+        # elif action == Actions.BRAKE.value:
+        #     self.engine.car.brake()
+        # elif action == Actions.TURN_LEFT.value:
+        #     self.engine.car.turn_left()
+        # elif action == Actions.TURN_RIGHT.value:
+        #     self.engine.car.turn_right()
+        throttle, steering = action  # Unpack actions
+        if throttle == Throttle.ACCELERATE.value:
             self.engine.car.accelerate()
-        elif action == Actions.BRAKE.value:
+        elif throttle == Throttle.BRAKE.value:
             self.engine.car.brake()
-        elif action == Actions.TURN_LEFT.value:
+
+        if steering == Steering.TURN_LEFT.value:
             self.engine.car.turn_left()
-        elif action == Actions.TURN_RIGHT.value:
+        elif steering == Steering.TURN_RIGHT.value:
             self.engine.car.turn_right()
 
         self.engine.car.update(self.engine.track)
