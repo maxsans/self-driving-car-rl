@@ -146,15 +146,15 @@ class CarRacingEnv(gym.Env):
 
         # Checkpoint reward
         if self.engine.current_checkpoint_index > self.last_checkpoint_index:
-            reward += 100
+            reward += 75
             self.last_checkpoint_index = self.engine.current_checkpoint_index
             # print("Checkpoint reward: 100")
 
         # Speed penalty
         if self.engine.car.speed <= 0:
-            reward -= 10
+            reward -= 5
         elif self.engine.car.speed >= MAX_SPEED - 0.1:
-            reward += 1
+            reward += 2
 
         # if self.engine.car.speed > 0:
         #     # Encourage going fast (reward is exponential to speed [0, 8])
@@ -167,12 +167,14 @@ class CarRacingEnv(gym.Env):
         rays = self.engine.car.rays_distances
         min_distance = min(rays)
         if min_distance < 15:
-            reward -= 10
+            reward -= 20
 
         left_rays = sum(rays[:len(rays)//2])
         right_rays = sum(rays[len(rays)//2 + 1:])
-        # reward -= abs(left_rays - right_rays) * 0.05
-        if abs(left_rays - right_rays) > 30:
+        if abs(left_rays - right_rays) > 25:
+            reward -= 5
+
+        if rays[0] > 100 or rays[-1] > 100:
             reward -= 5
 
         return reward
