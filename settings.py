@@ -13,7 +13,8 @@ CAR_COLOR = (255, 0, 0)
 
 # Track settings
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TRACK_IMAGE_PATH = os.path.join(BASE_DIR, 'assets', 'track.png')
+TRACK_1_PATH = os.path.join(BASE_DIR, 'assets', 'track_1.json')
+TRACK_2_PATH = os.path.join(BASE_DIR, 'assets', 'track_2.json')
 
 # RL settings
 RAY_LENGTH = 200
