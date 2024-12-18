@@ -10,7 +10,7 @@ from torch.backends.quantized import engine
 
 from game.car import MAX_SPEED
 from game.engine import GameEngine
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH, RAY_ANGLES
 
 
 # class Actions(Enum):
@@ -63,8 +63,8 @@ class CarRacingEnv(gym.Env):
 
         # Observations: [x, y, speed, angle, ray_1 distance, ray_2, ray_3, ray_4, ray_5]
         self.observation_space = spaces.Box(
-            low=np.array([0, 0, -MAX_SPEED, -np.inf, 0, 0, 0, 0, 0 ]),
-            high=np.array([1, 1, MAX_SPEED, np.inf, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH]),
+            low=np.array([0, 0, -MAX_SPEED, -np.inf] + [0] * len(RAY_ANGLES)),
+            high=np.array([1, 1, MAX_SPEED, np.inf] + [RAY_LENGTH] * len(RAY_ANGLES)),
             dtype=np.float64
         )
 
@@ -151,24 +151,38 @@ class CarRacingEnv(gym.Env):
             # print("Checkpoint reward: 100")
 
         # Speed penalty
-        if self.engine.car.speed <= 0:
-            reward -= 5
+        if self.engine.car.speed < 0:
+            reward -= 1 
+        if self.engine.car.speed == 0:
+            reward -= 2  # Réduire la pénalité si nécessaire
         elif self.engine.car.speed >= MAX_SPEED - 0.1:
-            reward += 2
+            reward += 1
+            
+        # Récupérer les distances des rayons
+        rays = self.engine.car.rays_distances
 
-        # if self.engine.car.speed > 0:
-        #     # Encourage going fast (reward is exponential to speed [0, 8])
-        #     reward += (self.engine.car.speed / MAX_SPEED) ** 2 * 4
-        # else:
-        #     # If not moving forward, penalize
-        #     reward -= 10
+        # Le rayon du milieu est celui à 0° (celui de la position centrale)
+        max_ray_index = rays.index(max(rays))
+        # print(f"Rays: {max(rays).}")
+        # print(f"Rays: {max(rays)}")
+
+        # Vérifier si le rayon à 0° est le plus long
+        if max_ray_index != 2:  # Si le rayon du milieu est le plus long
+            # print(f"Max ray index: {max_ray_index}")
+            reward -= 2 # Pénalité
+            
+        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
+
+
+        # print(f"Reward: {reward}")
 
         # 5. Ray-based rewards
-        # rays = self.engine.car.rays_distances
-        # min_distance = min(rays)
-        # if min_distance < 15:
-        #     reward -= 20
-
+        rays = self.engine.car.rays_distances
+        min_distance = min(rays)
+        if min_distance < 10:
+            reward -= 3
+        
+        
         # left_rays = sum(rays[:len(rays)//2])
         # right_rays = sum(rays[len(rays)//2 + 1:])
         # if abs(left_rays - right_rays) > 25:

@@ -4,7 +4,7 @@ from stable_baselines3 import PPO, DQN
 env = CarRacingEnv(render_mode="human")
 
 # model = PPO.load("rl/ppo_car_racing.zip")
-model = PPO.load("dqn_car_racing")
+model = PPO.load("ppo_car_racing")
 
 obs, _ = env.reset()
 for _ in range(10000):
