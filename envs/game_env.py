@@ -136,12 +136,12 @@ class CarRacingEnv(gym.Env):
 
         # Collision penalty
         if self.engine.car.dead:
-            reward -= 500
+            reward -= 50
             return reward
 
 
         # Progress reward
-        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.3
+        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
         self.last_distance_traveled = self.engine.car.distance_traveled
 
         # Checkpoint reward
@@ -164,18 +164,18 @@ class CarRacingEnv(gym.Env):
         #     reward -= 10
 
         # 5. Ray-based rewards
-        rays = self.engine.car.rays_distances
-        min_distance = min(rays)
-        if min_distance < 15:
-            reward -= 20
+        # rays = self.engine.car.rays_distances
+        # min_distance = min(rays)
+        # if min_distance < 15:
+        #     reward -= 20
 
-        left_rays = sum(rays[:len(rays)//2])
-        right_rays = sum(rays[len(rays)//2 + 1:])
-        if abs(left_rays - right_rays) > 25:
-            reward -= 5
+        # left_rays = sum(rays[:len(rays)//2])
+        # right_rays = sum(rays[len(rays)//2 + 1:])
+        # if abs(left_rays - right_rays) > 25:
+        #     reward -= 5
 
-        if rays[0] > 100 or rays[-1] > 100:
-            reward -= 5
+        # if rays[0] > 100 or rays[-1] > 100:
+        #     reward -= 5
 
         return reward
 

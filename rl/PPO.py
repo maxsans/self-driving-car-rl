@@ -13,16 +13,16 @@ env = make_vec_env(CarRacingEnv, n_envs=16, env_kwargs={"render_mode": "rgb_arra
 model = PPO(
     "MlpPolicy",
     env,
-    n_steps=1024,
-    batch_size=64,
+    n_steps=2048,
+    batch_size=512,
     n_epochs=4,
-    gamma=0.999,
+    gamma=0.97,
     gae_lambda=0.98,
     ent_coef=0.01,
     verbose=1,
 )
 
-model.learn(total_timesteps=500_000)
+model.learn(total_timesteps=2_000_000)
 
 print("Saving model...")
 model.save("ppo_car_racing")
