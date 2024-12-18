@@ -18,5 +18,4 @@ TRACK_2_PATH = os.path.join(BASE_DIR, 'assets', 'track_2.json')
 
 # RL settings
 RAY_LENGTH = 200
-RAY_ANGLES = [-90, -30, 0, 30, 90]
-
+RAY_ANGLES = [-90, -60, -30, 0, 30, 60, 90]

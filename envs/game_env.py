@@ -10,7 +10,7 @@ from torch.backends.quantized import engine
 
 from game.car import MAX_SPEED
 from game.engine import GameEngine
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH, RAY_ANGLES
 
 
 # class Actions(Enum):
@@ -61,10 +61,12 @@ class CarRacingEnv(gym.Env):
         # Steering: 0 = no action, 1 = turn left, 2 = turn right
         self.action_space = spaces.MultiDiscrete([3, 3])
 
-        # Observations: [x, y, speed, angle, ray_1 distance, ray_2, ray_3, ray_4, ray_5]
+        # Observations: [x, y, speed, angle, ray_1 distance, ray_2, ray_3, ..., ray_n]
         self.observation_space = spaces.Box(
             low=np.array([0, 0, -MAX_SPEED, -np.inf, 0, 0, 0, 0, 0 ]),
             high=np.array([1, 1, MAX_SPEED, np.inf, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH]),
+            low=np.array([0, 0, -MAX_SPEED, -np.inf] + [0] * len(RAY_ANGLES)),
+            high=np.array([1, 1, MAX_SPEED, np.inf] + [RAY_LENGTH] * len(RAY_ANGLES)),
             dtype=np.float64
         )
 
