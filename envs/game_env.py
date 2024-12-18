@@ -31,7 +31,7 @@ class Steering(Enum):
     TURN_RIGHT = 2
 
 class CarRacingEnv(gym.Env):
-    metadata = {'render_modes': ["human", "rgb_array"], 'render_fps': 30}
+    metadata = {'render_modes': ["human", "rgb_array"], 'render_fps': 60}
 
     def __init__(self, render_mode=None, no_fps_limiter=False):
         super(CarRacingEnv, self).__init__()
@@ -63,8 +63,6 @@ class CarRacingEnv(gym.Env):
 
         # Observations: [x, y, speed, angle, ray_1 distance, ray_2, ray_3, ..., ray_n]
         self.observation_space = spaces.Box(
-            low=np.array([0, 0, -MAX_SPEED, -np.inf, 0, 0, 0, 0, 0 ]),
-            high=np.array([1, 1, MAX_SPEED, np.inf, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH, RAY_LENGTH]),
             low=np.array([0, 0, -MAX_SPEED, -np.inf] + [0] * len(RAY_ANGLES)),
             high=np.array([1, 1, MAX_SPEED, np.inf] + [RAY_LENGTH] * len(RAY_ANGLES)),
             dtype=np.float64
@@ -133,30 +131,45 @@ class CarRacingEnv(gym.Env):
         ]
         return np.array(normalized_positions + [car.speed / MAX_SPEED, car.angle] + normalized_rays, dtype=np.float32)
 
+
     def _get_reward(self):
         reward = 0
 
+        rewards_sources = {
+            "collision_penalty": 0,
+            "progress_reward": 0,
+            "checkpoint_reward": 0,
+            "speed_penalty": 0,
+            "speed_bonus": 0,
+            "total_reward": 0
+        }
+
         # Collision penalty
         if self.engine.car.dead:
-            reward -= 500
+            reward -= 75
+            rewards_sources["collision_penalty"] = -75
             return reward
 
 
         # Progress reward
-        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.3
+        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
+        rewards_sources["progress_reward"] = (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
         self.last_distance_traveled = self.engine.car.distance_traveled
 
         # Checkpoint reward
         if self.engine.current_checkpoint_index > self.last_checkpoint_index:
             reward += 75
+            rewards_sources["checkpoint_reward"] = 75
             self.last_checkpoint_index = self.engine.current_checkpoint_index
             # print("Checkpoint reward: 100")
 
         # Speed penalty
         if self.engine.car.speed <= 0:
-            reward -= 5
+            reward -= 3
+            rewards_sources["speed_penalty"] = -3
         elif self.engine.car.speed >= MAX_SPEED - 0.1:
-            reward += 2
+            reward += 0.5
+            rewards_sources["speed_bonus"] = 0.5
 
         # if self.engine.car.speed > 0:
         #     # Encourage going fast (reward is exponential to speed [0, 8])
@@ -166,18 +179,22 @@ class CarRacingEnv(gym.Env):
         #     reward -= 10
 
         # 5. Ray-based rewards
-        rays = self.engine.car.rays_distances
-        min_distance = min(rays)
-        if min_distance < 15:
-            reward -= 20
+        # rays = self.engine.car.rays_distances
+        # min_distance = min(rays)
+        # if min_distance < 15:
+        #     reward -= 20
 
-        left_rays = sum(rays[:len(rays)//2])
-        right_rays = sum(rays[len(rays)//2 + 1:])
-        if abs(left_rays - right_rays) > 25:
-            reward -= 5
+        # left_rays = sum(rays[:len(rays)//2])
+        # right_rays = sum(rays[len(rays)//2 + 1:])
+        # if abs(left_rays - right_rays) > 25:
+        #     reward -= 5
 
-        if rays[0] > 100 or rays[-1] > 100:
-            reward -= 5
+        # if rays[0] > 100 or rays[-1] > 100:
+        #     reward -= 5
+
+        rewards_sources["total_reward"] = reward
+
+        # print("\nReward: ", rewards_sources)
 
         return reward
 
