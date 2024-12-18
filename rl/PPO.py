@@ -22,7 +22,7 @@ model = PPO(
     verbose=1,
 )
 
-model.learn(total_timesteps=2_000_000)
+model.learn(total_timesteps=15_000_000)
 
 print("Saving model...")
 model.save("ppo_car_racing")
