@@ -1,13 +1,11 @@
 import json
 import os
 import pygame
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR, TRACK_4_PATH, TRACK_1_PATH, TRACK_2_PATH
 
-TRACK_1 = "track_1.json"
-TRACK_2 = "track_2.json"
 
 class Track:
-    def __init__(self, track_file=TRACK_2):
+    def __init__(self, track_file=TRACK_2_PATH):
         self._load_track_data(track_file)
         self._load_image()
         self._load_metadata()
@@ -15,11 +13,10 @@ class Track:
 
     def _load_track_data(self, track_file):
         """Charge les données du fichier JSON."""
-        track_path = os.path.join(BASE_DIR, "assets", track_file)
-        if not os.path.exists(track_path):
-            raise FileNotFoundError(f"Le fichier {track_path} n'existe pas.")
+        if not os.path.exists(track_file):
+            raise FileNotFoundError(f"Le fichier {track_file} n'existe pas.")
 
-        with open(track_path, "r") as file:
+        with open(track_file, "r") as file:
             self._data = json.load(file)
 
         if "path" not in self._data or "checkpoints" not in self._data:

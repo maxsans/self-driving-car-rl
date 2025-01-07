@@ -20,9 +20,10 @@ model = PPO(
     gae_lambda=0.98,
     ent_coef=0.01,
     verbose=1,
+    tensorboard_log="./ppo_tensorboard/"
 )
 
-model.learn(total_timesteps=5_000_000)
+model.learn(total_timesteps=15_000_000)
 
 print("Saving model...")
 model.save("ppo_car_racing")
