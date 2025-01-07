@@ -151,27 +151,29 @@ class CarRacingEnv(gym.Env):
             # print("Checkpoint reward: 100")
 
         # Speed penalty
-        if self.engine.car.speed < 0:
-            reward -= 1 
+        # if self.engine.car.speed < 0:
+        #     reward -= 1 
+        if self.engine.car.speed > 0:
+            reward += 0.5
         if self.engine.car.speed == 0:
             reward -= 2  # Réduire la pénalité si nécessaire
         elif self.engine.car.speed >= MAX_SPEED - 0.1:
             reward += 1
             
         # Récupérer les distances des rayons
-        rays = self.engine.car.rays_distances
+        # rays = self.engine.car.rays_distances
 
         # Le rayon du milieu est celui à 0° (celui de la position centrale)
-        max_ray_index = rays.index(max(rays))
+        # max_ray_index = rays.index(max(rays))
         # print(f"Rays: {max(rays).}")
         # print(f"Rays: {max(rays)}")
 
         # Vérifier si le rayon à 0° est le plus long
-        if max_ray_index != 2:  # Si le rayon du milieu est le plus long
+        # if max_ray_index != 2:  # Si le rayon du milieu est le plus long
             # print(f"Max ray index: {max_ray_index}")
-            reward -= 2 # Pénalité
+            # reward -= 2 # Pénalité
             
-        reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
+        # reward += (self.engine.car.distance_traveled - self.last_distance_traveled) * 0.2
 
 
         # print(f"Reward: {reward}")
@@ -179,8 +181,9 @@ class CarRacingEnv(gym.Env):
         # 5. Ray-based rewards
         rays = self.engine.car.rays_distances
         min_distance = min(rays)
-        if min_distance < 10:
-            reward -= 3
+        if min_distance < 25:
+            reward -= 5
+            
         
         
         # left_rays = sum(rays[:len(rays)//2])
