@@ -79,23 +79,8 @@ class GameEngine:
         while running:
             dt = self.clock.tick(FPS) / 1000
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    self.paused = not self.paused 
-                    if self.paused:
-                        self.pause_start_time = pygame.time.get_ticks()
-                    else:
-                        self.total_pause_time += pygame.time.get_ticks() - self.pause_start_time
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_t:
-                        self.show_rays = not self.show_rays
-                # Handle checkbox events
-                new_state = self.checkbox.handle_event(event)
-                if new_state is not None:
-                    self.show_checkpoints = new_state
-
+            self.handle_events()
+            
             if not self.paused:
                 # Input handling
                 keys = pygame.key.get_pressed()
@@ -154,6 +139,23 @@ class GameEngine:
         lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
         self.screen.blit(lap_info, (10, 10))
 
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.paused = not self.paused 
+                if self.paused:
+                    self.pause_start_time = pygame.time.get_ticks()
+                else:
+                    self.total_pause_time += pygame.time.get_ticks() - self.pause_start_time
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    self.show_rays = not self.show_rays
+            # Handle checkbox events
+            new_state = self.checkbox.handle_event(event)
+            if new_state is not None:
+                self.show_checkpoints = new_state
 
     def save_car_path(self, track_image, car_positions, colors):
         track_array = pygame.surfarray.array3d(track_image)

@@ -1,11 +1,11 @@
 import json
 import os
 import pygame
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR, TRACK_2_PATH
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR, TRACK_4_PATH
 
 
 class Track:
-    def __init__(self, track_file=TRACK_2_PATH):
+    def __init__(self, track_file=TRACK_4_PATH):
         self._load_track_data(track_file)
         self._load_image()
         self._load_metadata()

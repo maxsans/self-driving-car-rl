@@ -5,9 +5,11 @@ import pygame
 
 import gymnasium as gym
 from gymnasium import spaces
+from six import print_
+from torch.backends.quantized import engine
 
 from game.car import MAX_SPEED, Car
-from game.engine import GameEngine
+from game.engine import GameEngine, Checkbox
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH, RAY_ANGLES
 
 
@@ -218,6 +220,8 @@ class CarRacingEnv(gym.Env):
         return reward
 
     def render(self, mode="human"):
+        self.engine.handle_events()
+        
         if self.versus:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_UP]:
