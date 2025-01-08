@@ -8,7 +8,7 @@ from gymnasium import spaces
 from six import print_
 from torch.backends.quantized import engine
 
-from game.car import MAX_SPEED
+from game.car import MAX_SPEED, Car
 from game.engine import GameEngine
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, RAY_LENGTH, RAY_ANGLES
 
@@ -33,11 +33,12 @@ class Steering(Enum):
 class CarRacingEnv(gym.Env):
     metadata = {'render_modes': ["human", "rgb_array"], 'render_fps': 30}
 
-    def __init__(self, render_mode=None, no_fps_limiter=False):
+    def __init__(self, render_mode=None, no_fps_limiter=False, versus=False):
         super(CarRacingEnv, self).__init__()
 
         self.render_mode = render_mode
         self.no_fps_limiter = no_fps_limiter
+        self.versus = versus
 
         assert self.render_mode is None or self.render_mode in self.metadata["render_modes"]
 
@@ -52,6 +53,9 @@ class CarRacingEnv(gym.Env):
 
         self.clock = pygame.time.Clock()
         self.engine = GameEngine(self.screen)
+        if self.versus:
+            self.player_car = Car(self.engine.track.start_point[0],
+                                  self.engine.track.start_point[1])  # Slight offset
 
         # Define action and observation space
         # # Actions: [do nothing, accelerate, brake, turn_left, turn_right]
@@ -79,6 +83,7 @@ class CarRacingEnv(gym.Env):
         super().reset(seed=seed)
 
         self.engine.reset()
+        
         self.last_distance_traveled = 0
         self.last_checkpoint_index = 0
         return self._get_obs(), {}
@@ -197,6 +202,22 @@ class CarRacingEnv(gym.Env):
         return reward
 
     def render(self, mode='human'):
+        if self.versus:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP]:
+                self.player_car.accelerate()
+            if keys[pygame.K_DOWN]:
+                self.player_car.brake()
+            if keys[pygame.K_LEFT]:
+                self.player_car.turn_left()
+            if keys[pygame.K_RIGHT]:
+                self.player_car.turn_right()
+
+            if not self.player_car.dead:
+                self.player_car.update(self.engine.track)
+                self.player_car.check_collision(self.engine.track)
+            self._draw_player_car()
+
         self.engine.draw()
 
         if self.render_mode == "human":
@@ -209,6 +230,14 @@ class CarRacingEnv(gym.Env):
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2)
             )
+
+    def _draw_player_car(self):
+        # Draw a second car similarly to self.engine.car
+        car_surface = pygame.Surface((self.player_car.width, self.player_car.height), pygame.SRCALPHA)
+        pygame.draw.rect(car_surface, (0, 255, 0), (0, 0, self.player_car.width, self.player_car.height))
+        rotated_image = pygame.transform.rotate(car_surface, -self.player_car.angle)
+        rect = rotated_image.get_rect(center=self.player_car.position)
+        self.screen.blit(rotated_image, rect.topleft)
 
     def close(self):
         pygame.quit()

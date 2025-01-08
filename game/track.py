@@ -10,7 +10,7 @@ TRACK_4 = "track_4.json"
 TRACK_5 = "track_5.json"
 TRACK_6 = "track_6.json"
 class Track:
-    def __init__(self, track_file=TRACK_6):
+    def __init__(self, track_file=TRACK_4):
         self._load_track_data(track_file)
         self._load_image()
         self._load_metadata()
