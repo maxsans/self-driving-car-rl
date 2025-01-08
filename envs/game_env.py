@@ -5,8 +5,6 @@ import pygame
 
 import gymnasium as gym
 from gymnasium import spaces
-from six import print_
-from torch.backends.quantized import engine
 
 from game.car import MAX_SPEED, Car
 from game.engine import GameEngine
