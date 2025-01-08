@@ -1,7 +1,7 @@
 import json
 import os
 import pygame
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR, TRACK_4_PATH, TRACK_1_PATH, TRACK_2_PATH
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, BASE_DIR, TRACK_2_PATH
 
 
 class Track:
@@ -20,21 +20,29 @@ class Track:
             self._data = json.load(file)
 
         if "path" not in self._data or "checkpoints" not in self._data:
-            raise ValueError("Le fichier JSON est mal structuré. 'path' et 'checkpoints' sont requis.")
+            raise ValueError(
+                "Le fichier JSON est mal structuré. 'path' et 'checkpoints' sont requis."
+            )
 
     def _load_image(self):
         """Charge et redimensionne l'image de la piste."""
         image_path = os.path.join(BASE_DIR, "assets", self._data["path"])
         if not os.path.exists(image_path):
-            raise FileNotFoundError(f"L'image de la piste {image_path} est introuvable.")
+            raise FileNotFoundError(
+                f"L'image de la piste {image_path} est introuvable."
+            )
 
         original_image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(original_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.image = pygame.transform.scale(
+            original_image, (WINDOW_WIDTH, WINDOW_HEIGHT)
+        )
         self.rect = self.image.get_rect()
 
     def _load_mask(self):
         """Crée un masque pour détecter les bordures du circuit."""
-        self._mask = pygame.mask.from_threshold(self.image, (255, 255, 255), (10, 10, 10))
+        self._mask = pygame.mask.from_threshold(
+            self.image, (255, 255, 255), (10, 10, 10)
+        )
 
     def _load_metadata(self):
         """Charge les métadonnées de la piste."""

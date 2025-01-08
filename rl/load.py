@@ -1,10 +1,10 @@
 from envs.game_env import CarRacingEnv
 from stable_baselines3 import PPO, DQN
 
-env = CarRacingEnv(render_mode="human")
+env = CarRacingEnv(render_mode="human", versus=True)
 
-model = PPO.load("rl/ppo_car_racing.zip")
-# model = DQN.load("rl/dqn_car_racing.zip")
+# model = PPO.load("rl/ppo_car_racing.zip")
+model = PPO.load("ppo_car_racing")
 
 obs, _ = env.reset()
 for _ in range(10000):
