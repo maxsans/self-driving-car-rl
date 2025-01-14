@@ -233,6 +233,11 @@ class CarRacingEnv(gym.Env):
                 self.player_car.turn_left()
             if keys[pygame.K_RIGHT]:
                 self.player_car.turn_right()
+            
+            if keys[pygame.K_r]:
+                self.engine.car.dead = True
+                if self.versus:
+                    self.player_car.dead= True
 
             
             if not self.player_car.dead:
@@ -246,10 +251,7 @@ class CarRacingEnv(gym.Env):
             self._draw_player_car()
 
             
-        if keys[pygame.K_r]:
-            self.engine.car.dead = True
-            if self.versus:
-                self.player_car.dead= True
+        
         
 
 
