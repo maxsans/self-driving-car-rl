@@ -57,7 +57,7 @@ class CarRacingEnv(gym.Env):
 
         self.clock = pygame.time.Clock()
         self.engine = GameEngine(self.screen)
-        if self.versus:
+        if versus:
             self.player_car = Car(
                 self.engine.track.start_point[0], self.engine.track.start_point[1]
             )  # Slight offset
@@ -221,7 +221,8 @@ class CarRacingEnv(gym.Env):
 
     def render(self, mode="human"):
         self.engine.handle_events()
-        
+        self.engine.draw()
+
         if self.versus:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_UP]:
@@ -233,12 +234,25 @@ class CarRacingEnv(gym.Env):
             if keys[pygame.K_RIGHT]:
                 self.player_car.turn_right()
 
+            
             if not self.player_car.dead:
                 self.player_car.update(self.engine.track)
                 self.player_car.check_collision(self.engine.track)
+            else:
+                self.player_car.dead = False
+                self.player_car.position.update(self.engine.track.start_point)
+                self.player_car.speed = 0
+                self.player_car.angle = 0
             self._draw_player_car()
 
-        self.engine.draw()
+            
+        if keys[pygame.K_r]:
+            self.engine.car.dead = True
+            if self.versus:
+                self.player_car.dead= True
+        
+
+
 
         if self.render_mode == "human":
             pygame.event.pump()

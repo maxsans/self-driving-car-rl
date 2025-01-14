@@ -104,7 +104,7 @@ class GameEngine:
                 if self.current_checkpoint_index >= len(self.track.checkpoints):
                     self.lap_count += 1
                     self.last_lap_time = (pygame.time.get_ticks() - self.lap_start_time - self.total_pause_time) / 1000
-                    print(f"Tour {self.lap_count} en {self.last_lap_time:.2f} secondes")
+                    # print(f"Tour {self.lap_count} en {self.last_lap_time:.2f} secondes")
                     self.lap_start_time = pygame.time.get_ticks()
                     self.current_checkpoint_index = 0
 
@@ -136,8 +136,8 @@ class GameEngine:
         self.screen.blit(timer_text, (WINDOW_WIDTH - timer_text.get_width() - 10, 10))
 
         # Display lap information
-        lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
-        self.screen.blit(lap_info, (10, 10))
+        # lap_info = self.font.render(f"Tour {self.lap_count} en {self.last_lap_time:.2f}s", True, (0, 0, 0))
+        # self.screen.blit(lap_info, (10, 10))
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -152,6 +152,9 @@ class GameEngine:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     self.show_rays = not self.show_rays
+                if event.key == pygame.K_c:
+                    self.checkbox.checked = not self.checkbox.checked
+                    self.show_checkpoints = self.checkbox.checked
             # Handle checkbox events
             new_state = self.checkbox.handle_event(event)
             if new_state is not None:
