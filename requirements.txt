@@ -1,3 +1,4 @@
 pygame
 stable-baselines3
 gymnasium
+tensorboard

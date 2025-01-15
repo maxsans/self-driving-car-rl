@@ -1,10 +1,10 @@
-# # Car Racing Reinforcement Learning
+# Car Racing Reinforcement Learning
 
 This project implements a car racing game using reinforcement learning algorithms. The car's movement and collision detection are handled using Pygame, and the reinforcement learning models are trained using Stable Baselines3.
 
 ## Project Structure
 
-- `game/car.py`: Contains the car's movement logic, raycasting methods, and collision detection.
+- `game/`: Contains the game logic, car movement, raycasting methods, collision detection, etc.
 - `rl/load.py`: Loads a pre-trained reinforcement learning model and runs it in the car racing environment.
 - `rl/PPO.py`: Trains a PPO model on the car racing environment and evaluates its performance.
 

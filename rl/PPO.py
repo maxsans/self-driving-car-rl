@@ -3,7 +3,6 @@ from envs.game_env import CarRacingEnv
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import CheckpointCallback
 
 CHECKPOINT_DIR = "checkpoints_ppo"
@@ -36,7 +35,7 @@ checkpoint_callback = CheckpointCallback(
 # Entraînement avec le callback
 model.learn(total_timesteps=75_000_000, callback=checkpoint_callback)
 
-model.save("ppo_car_racing")
+model.save("all-models/ppo_car_racing")
 
 
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
