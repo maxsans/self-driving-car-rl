@@ -2,11 +2,6 @@
 
 This project implements a car racing game using reinforcement learning algorithms. The car's movement and collision detection are handled using Pygame, and the reinforcement learning models are trained using Stable Baselines3.
 
-![Image 1](https://raw.githubusercontent.com/maxsans/self-driving-car-rl/main/assets/width_1600.webp)
-![Image 2](https://raw.githubusercontent.com/maxsans/self-driving-car-rl/main/assets/image_demo.webp)
-![Image 3](https://raw.githubusercontent.com/maxsans/self-driving-car-rl/main/assets/width_471.webp)
-
-
 ## Project Structure
 
 - `game/`: Contains the game logic, car movement, raycasting methods, collision detection, etc.
@@ -24,7 +19,7 @@ This project implements a car racing game using reinforcement learning algorithm
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/JAWS-tm/car-racing-rl.git
+   git clone https://github.com/maxsans/self-driving-car-rl.git
    cd car-racing-rl
    ```
 
@@ -77,3 +72,9 @@ We conducted five training sessions:
 - Press **C** to toggle the display of checkpoints.
 - Press **T** to toggle the display of rays.
 - Press **R** to reset your car and the AI car.
+
+### Images
+
+![Image 1](assets/image_demo.jpg)
+![Image 2](assets/score.jpg)
+![Image 3](assets/tensorBoard.jpg)
